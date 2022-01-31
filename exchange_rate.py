@@ -55,8 +55,9 @@ def exchange_rate_analysis(df):
     grouped_data = df_month.groupby(["rate"]).mean()
     print(grouped_data)
 
+
     favorable_year_rate = grouped_data["rate"].min()  # 26.37467741935484
-    print(favorable_year_rate)
+    print(favorable_year_rate, "favorable year rate")
     # favorable_month = grouped_data[grouped_data["rate"] == favorable_year_rate]
     # print("The most favorable average monthly rate for the year was:", favorable_month, favorable_year_rate)
 
