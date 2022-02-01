@@ -76,11 +76,6 @@ def exchange_rate_analysis(df):
     print(most_frequent)
 
 
-def exchange_rate_forecast():
-    # 365 - (365 // 3) * 3  # = 2: 28, 27 -  28 27 26 28
-    return "121 - days was the most common currency rate 28 and 27"
-
-
 if __name__ == "__main__":
     start_date = moment.date('2021-01-01')
     end_date = moment.date('2022-01-01')
@@ -91,4 +86,4 @@ if __name__ == "__main__":
     data_items = list(data_dict.items())
     dataframe = pd.DataFrame(data_items, columns=["data", "rate"])
     exchange_rate_analysis(dataframe)
-    print(exchange_rate_forecast())
+
