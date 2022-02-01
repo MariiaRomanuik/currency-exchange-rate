@@ -45,7 +45,7 @@ def exchange_rate_analysis(df):
     print("The minimum value of the course for the year:", min_for_year)
 
     month_list = []
-    for i in range(0, 366):
+    for i in range(0, len(df)):
         month = get_list_of_data(response)[0][i][3:5]
         month_list.append(month)
 
