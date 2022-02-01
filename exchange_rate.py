@@ -32,16 +32,16 @@ def get_list_of_data(data):
 
 
 def exchange_rate_analysis(df):
-    average_for_year = df["rate"].mean()  # 27.283450273224044
+    average_for_year = df["rate"].mean()
     print("Average exchange rate for the year:", average_for_year)
 
-    median_for_year = df["rate"].median()  # 27.2883
+    median_for_year = df["rate"].median()
     print("Median exchange rate:", median_for_year)
 
-    max_for_year = df["rate"].max()  # 28.431
+    max_for_year = df["rate"].max()
     print("The maximum value of the course for the year:", max_for_year)
 
-    min_for_year = df["rate"].min()  # 26.0575
+    min_for_year = df["rate"].min()
     print("The minimum value of the course for the year:", min_for_year)
 
     month_list = []
@@ -50,13 +50,13 @@ def exchange_rate_analysis(df):
         month_list.append(month)
 
     data_month_dict = tuple(zip(month_list, get_list_of_data(response)[1]))
-    data_month_list = list(data_month_dict)
+    data_month_list = list(data_month_dict)  
     df_month = pd.DataFrame(data_month_list, columns=["month", "rate"])
     grouped_data = df_month.groupby(["rate"]).mean()
     print(grouped_data)
 
 
-    favorable_year_rate = grouped_data["rate"].min()  # 26.37467741935484
+    favorable_year_rate = grouped_data["rate"].min()
     print("Favorable year rate", favorable_year_rate)
     # favorable_month = grouped_data[grouped_data["rate"] == favorable_year_rate]
     # print("The most favorable average monthly rate for the year was:", favorable_month, favorable_year_rate)
