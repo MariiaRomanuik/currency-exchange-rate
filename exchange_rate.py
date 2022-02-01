@@ -5,13 +5,13 @@ import pandas as pd
 
 def dates_between_two_dates(startDate, endDate):
     diff = abs(startDate.diff(endDate).days)
-    for n in range(0, diff + 1):
+    for n in range(0, diff):
         yield startDate.strftime("%Y%m%d")
         startDate = startDate.add(days=1)
 
 
 def usd_data(json_object):
-    return [obj for obj in json_object if obj['currency'] == "USD"]
+    return filter(lambda obj: obj['currency'] == "USD", json_object)
 
 
 def get_url(date):
