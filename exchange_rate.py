@@ -31,6 +31,18 @@ def get_list_of_data(data):
     return list_of_date, list_of_rate
 
 
+def most_frequent_rates(df):
+    rates_frequency = {}
+    for index, row in df.iterrows():
+        if str(row['rate']) in rates_frequency:
+            rates_frequency[str(row['rate'])] += 1
+        else:
+            rates_frequency[str(row['rate'])] = 1
+
+    sorted_frequency = {k: v for k, v in sorted(rates_frequency.items(), key=lambda item: item[1], reverse=True)}
+    return {k: sorted_frequency[k] for k in list(sorted_frequency)[:5]}
+
+
 def exchange_rate_analysis(df):
     average_for_year = df["rate"].mean()
     print("Average exchange rate for the year:", average_for_year)
@@ -50,16 +62,18 @@ def exchange_rate_analysis(df):
         month_list.append(month)
 
     data_month_dict = tuple(zip(month_list, get_list_of_data(response)[1]))
-    data_month_list = list(data_month_dict)  
+    data_month_list = list(data_month_dict)
     df_month = pd.DataFrame(data_month_list, columns=["month", "rate"])
     grouped_data = df_month.groupby(["rate"]).mean()
     print(grouped_data)
-
 
     favorable_year_rate = grouped_data["rate"].min()
     print("Favorable year rate", favorable_year_rate)
     # favorable_month = grouped_data[grouped_data["rate"] == favorable_year_rate]
     # print("The most favorable average monthly rate for the year was:", favorable_month, favorable_year_rate)
+
+    most_frequent = most_frequent_rates(df)
+    print(most_frequent)
 
 
 def exchange_rate_forecast():
