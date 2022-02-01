@@ -10,10 +10,6 @@ def dates_between_two_dates(startDate, endDate):
         startDate = startDate.add(days=1)
 
 
-def usd_data(json_object):
-    return filter(lambda obj: obj['currency'] == "USD", json_object)
-
-
 def get_url(date):
     return f"https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?date={date}&json"
 
