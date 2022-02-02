@@ -1,4 +1,4 @@
-import pandas as pd
+import os
 import psycopg2
 
 
@@ -12,10 +12,33 @@ def create_table(name):
     print(f"Table - {name} crated successfully")
 
 
-if __name__ == "__main__":
-    conn = psycopg2.connect(
-        database="postgres", user='postgres', password='posql', host='localhost', port='5432'
+def get_db_creds(path):
+    data = []
+    with open(path, "r") as myfile:
+        data = myfile.readlines()
+
+    var_dict = {}
+    for var in data:
+        var = var.replace('\n', '').split('=')
+        var_dict[var[0]] = var[1]
+
+    return var_dict
+
+
+def connect_to_db():
+    creds = get_db_creds("./db_credentials.txt")
+    connection = psycopg2.connect(
+        host=creds["host"],
+        port=creds["port"],
+        user=creds["user"],
+        password=creds["password"],
+        database=creds["database"]
     )
+    return connection
+
+
+if __name__ == "__main__":
+    conn = connect_to_db()
     conn.autocommit = True
     cursor = conn.cursor()
     # create_table("CURRENCY_RATE")
