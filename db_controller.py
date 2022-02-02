@@ -1,29 +1,26 @@
 import pandas as pd
 import psycopg2
 
-conn = psycopg2.connect(
-    database="postgres", user='postgres', password='posql', host='localhost', port='5432'
-)
-conn.autocommit = True
-cursor = conn.cursor()
-
 
 def create_database(name):
-    create_db = f'''CREATE database {name}''';
-    cursor.execute(create_db)
+    cursor.execute(f'''CREATE database {name}''')
     print("Database created successfully......")
 
 
-def crate_table(name):
-    sql = f'''CREATE TABLE {name}(data str NOT NULL, rate float;'''
-    cursor.execute(sql)
+def create_table(name):
+    cursor.execute(f'''CREATE TABLE {name}(data varchar NOT NULL, rate float)''')
     print(f"Table - {name} crated successfully")
 
 
+if __name__ == "__main__":
+    conn = psycopg2.connect(
+        database="postgres", user='postgres', password='posql', host='localhost', port='5432'
+    )
+    conn.autocommit = True
+    cursor = conn.cursor()
+    # create_table("CURRENCY_RATE")
+    cursor.execute('''select * from CURRENCY_RATE;''')
+    for i in cursor.fetchall():
+        print(i)
 
-# sql3 = '''select * from details;'''
-# cursor.execute(sql3)
-# for i in cursor.fetchall():
-#     print(i)
-
-conn.close()
+    conn.close()
