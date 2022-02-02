@@ -1,4 +1,6 @@
 import csv
+import errno
+import os
 
 import requests
 import moment
@@ -77,7 +79,14 @@ def exchange_rate_analysis(df):
 
 def dataframe_to_csv(csv_name, dictionary):
     df = pd.DataFrame(dictionary)
-    csv_file = df.to_csv(f'{csv_name}.csv', encoding='utf-8')
+    if not os.path.exists(os.path.dirname(csv_name)):
+        try:
+            os.makedirs(os.path.dirname(csv_name))
+            # os.mkdir(os.path.dirname(f'.{csv_name}'))
+        except OSError as exc:  # Guard against race condition
+            if exc.errno != errno.EEXIST:
+                raise
+    csv_file = df.to_csv(csv_name, encoding='utf-8')
     print("Data successfully written to csv")
     return csv_file
 
@@ -89,7 +98,7 @@ if __name__ == "__main__":
     list_of_url = list(map(get_url, dates))
     response = list(map(lambda url: requests.get(url).json(), list_of_url))
     data_dict = {"date": get_list_of_data(response)[0], "rate": get_list_of_data(response)[1]}
-    csv_file_name = "currency.csv"
+    csv_file_name = "./data/currency.csv"
     dataframe_to_csv(csv_file_name, data_dict)
 
 
