@@ -1,3 +1,5 @@
+import csv
+
 import requests
 import moment
 import pandas as pd
@@ -25,6 +27,7 @@ def get_list_of_data(data):
                 list_of_rate.append(rate)
                 list_of_date.append(exchange_date)
     return list_of_date, list_of_rate
+
 
 
 def most_frequent_rates(df):
@@ -72,14 +75,31 @@ def exchange_rate_analysis(df):
     print(most_frequent)
 
 
+def dataframe_to_csv(csv_name, dictionary):
+    df = pd.DataFrame(dictionary)
+    csv_file = df.to_csv(f'{csv_name}.csv', encoding='utf-8')
+    print("Data successfully written to csv")
+    return csv_file
+
+
 if __name__ == "__main__":
     start_date = moment.date('2021-01-01')
     end_date = moment.date('2022-01-01')
     dates = list(dates_between_two_dates(start_date, end_date))
     list_of_url = list(map(get_url, dates))
     response = list(map(lambda url: requests.get(url).json(), list_of_url))
-    data_dict = dict(zip(get_list_of_data(response)[0], get_list_of_data(response)[1]))
-    data_items = list(data_dict.items())
-    dataframe = pd.DataFrame(data_items, columns=["data", "rate"])
-    exchange_rate_analysis(dataframe)
+    data_dict = {"date": get_list_of_data(response)[0], "rate": get_list_of_data(response)[1]}
+    csv_file_name = "currency.csv"
+    dataframe_to_csv(csv_file_name, data_dict)
 
+
+
+    # dict_to_csv(data_dict, file_name, columns)
+    # dataframe = pd.DataFrame(data_items, columns=["data", "rate"])
+    # csv_data = to_csv(dataframe, "currency")
+    # exchange_rate_analysis(dataframe)
+
+    # Question: df to csv or  csv to df?
+    # l did df to csv, but l need to write from csv to database then read tas dataframe
+
+    # json to csv,  csv to s3, s3 to postrgres,  postrger read as dataframe
