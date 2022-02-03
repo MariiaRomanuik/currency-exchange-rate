@@ -1,18 +1,22 @@
 import os
 import psycopg2
+from smart_open import smart_open
 
 
 def create_database(name):
     cursor.execute(f'''CREATE database {name}''')
-    print("Database created successfully......")
+    return "Database created successfully......"
 
 
 def create_table(name):
-    cursor.execute(f'''CREATE TABLE {name}(data varchar NOT NULL, rate float)''')
-    print(f"Table - {name} crated successfully")
+    try:
+        cursor.execute(f'''CREATE TABLE {name}(date varchar NOT NULL CONSTRAINT date UNIQUE, rate varchar)''')
+        return f"Table - {name} crated successfully"
+    except Exception as error:
+        return error
 
 
-def get_db_creds(path):
+def get_db_credentials(path):
     try:
         with open(path, "r") as myfile:
             data = myfile.readlines()
@@ -28,9 +32,7 @@ def get_db_creds(path):
 
 
 def connect_to_db():
-    # creds = get_db_creds("./db_credentials.txt")
-
-    credentials = get_db_creds(".../db_credentials.txt")
+    credentials = get_db_credentials("./db_credentials.txt")
     connection = psycopg2.connect(
         host=credentials["host"],
         port=credentials["port"],
@@ -41,13 +43,37 @@ def connect_to_db():
     return connection
 
 
+def from_s3_to_postgres(bucketName, fileName, cursor, connection):
+    with smart_open(f's3://{bucketName}/{fileName}', 'rb') as s3_source:
+        for line in s3_source:
+            # print(line.decode('utf8'))
+
+            # TODO: write without first line
+            rate = line.decode('utf8').split(",")[1]
+            date = line.decode('utf8').split(",")[2].split("\r\n")[0]
+            try:
+                postgres_insert_query = """ INSERT INTO CURRENCY_RATE (date, rate) VALUES (%s, %s)"""
+                cursor.execute(postgres_insert_query, (rate, date,))
+            except psycopg2.Error as e:
+                print(e)
+                pass
+        connection.commit()
+        return "Data successfully written to database!"
+
+
 if __name__ == "__main__":
+    file_name = "currency.csv"
+    csv_file_name = f'data/{file_name}'
+    bucket_name = 's3-all-data'
+
     conn = connect_to_db()
     conn.autocommit = True
     cursor = conn.cursor()
-    # create_table("CURRENCY_RATE")
-    cursor.execute('''select * from CURRENCY_RATE;''')
-    for i in cursor.fetchall():
-        print(i)
+    # print(create_table("CURRENCY_RATE"))
+
+    # print(from_s3_to_postgres(bucket_name, file_name, cursor, conn))
+    # cursor.execute('''select * from CURRENCY_RATE;''')
+    # for i in cursor.fetchall():
+    #     print(i)
 
     conn.close()
