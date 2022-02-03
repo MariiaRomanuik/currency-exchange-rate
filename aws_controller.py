@@ -5,14 +5,14 @@ import awswrangler as wr
 import os
 
 
-def create_bucket(bucket_name, aws_region):
+def create_bucket(bucketName, awsRegion):
     s3 = boto3.client('s3')
     s3_resource = boto3.resource('s3')
     buckets_name = []
     for bucket in s3_resource.buckets.all():
         buckets_name.append(bucket.name)
-    if bucket_name not in buckets_name:
-        s3.create_bucket(Bucket=bucket_name, CreateBucketConfiguration={'LocationConstraint': aws_region})
+    if bucketName not in buckets_name:
+        s3.create_bucket(Bucket=bucketName, CreateBucketConfiguration={'LocationConstraint': awsRegion})
         print("Bucket created")
         return True
     else:
@@ -20,17 +20,17 @@ def create_bucket(bucket_name, aws_region):
         return False
 
 
-def upload_file_to_s3(file_name, bucket, object_name=None):
-    # If S3 object_name was not specified, use file_name
-    if object_name is None:
+def upload_file_to_s3(fileName, bucket, objectName=None):
+    # If S3 object_name was not specified, use fileName
+    if objectName is None:
         object_name = os.path.basename(file_name)
 
     # Upload the file
     s3_client = boto3.client('s3')
     try:
-        response = s3_client.upload_file(file_name, bucket, object_name)
-        os.remove(file_name)
-        print(file_name, "successfully removed")
+        response = s3_client.upload_file(fileName, bucket, objectName)
+        os.remove(fileName)
+        print(fileName, "successfully removed")
     except ClientError as e:
         logging.error(e)
         return False
