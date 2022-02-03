@@ -37,28 +37,32 @@ def upload_file_to_s3(file_name, bucket, object_name=None):
     return True
 
 
-def is_in_s3(file_name, bucket_name):
+def is_in_s3(fileName, bucketName):
     s3 = boto3.resource('s3')
-    bucket = s3.Bucket(bucket_name)
-    objs = list(bucket.objects.filter(Prefix=file_name))
-    if any([w.key == file_name for w in objs]):
-        print("File",  file_name, "exists in", bucket_name, "bucket!")
+    bucket = s3.Bucket(bucketName)
+    objs = list(bucket.objects.filter(Prefix=fileName))
+    if any([w.key == fileName for w in objs]):
+        print("File",  fileName, "exists in", bucketName, "bucket!")
+        return True
     else:
-        print("File", file_name, "doesn't exists in", bucket_name, "bucket!")
+        print("File", fileName, "doesn't exists in", bucketName, "bucket!")
+        return False
 
 
-def csv_from_s3_as_df(path):
+def read_csv_from_s3_as_df(path):
     df = wr.s3.read_csv(path=path)
     return df
 
 
 if __name__ == "__main__":
-    filename = "currency.csv"
-    csv_file_name = f'data/{filename}'
+    file_name = "currency.csv"
+    csv_file_name = f'data/{file_name}'
+    bucket_name = 's3-all-data'
+    s3_path_to_file = f's3://{bucket_name}/{file_name}'
     bucket_name = 's3-all-data'
     region = 'us-east-2'
     # print(create_bucket(bucket_name, region))
-    # print(upload_file_to_s3(filename, bucket_name))
-    if is_in_s3(filename, bucket_name):
-        print(csv_from_s3_as_df(filename))
+    # print(upload_file_to_s3(file_name, bucket_name))
+    if is_in_s3(file_name, bucket_name):
+        print(read_csv_from_s3_as_df(s3_path_to_file))
 
