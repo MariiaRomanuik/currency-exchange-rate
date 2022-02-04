@@ -1,6 +1,7 @@
 import os
 import psycopg2
 from smart_open import smart_open
+import pandas as pd
 
 
 def create_database(name):
@@ -61,6 +62,28 @@ def from_s3_to_postgres(bucketName, fileName, cursor, connection):
         return "Data successfully written to database!"
 
 
+def get_data_from_db(cursor, connection):
+    try:
+        select_date_query = """ SELECT "date" FROM CURRENCY_RATE"""
+        cursor.execute(select_date_query)
+        date = cursor.fetchall()
+        select_rate_query = """ SELECT "rate" FROM CURRENCY_RATE"""
+        cursor.execute(select_rate_query)
+        rate = cursor.fetchall()
+        date_list = []
+        rate_list = []
+        for i, j in zip(date, rate):
+            date_list.append(i[0])
+            rate_list.append(j[0])
+        data_dict = dict(zip(date_list, rate_list))
+        data_items = list(data_dict.items())
+        df = pd.DataFrame(data_items, columns=["data", "rate"])
+        connection.commit()
+        return df
+    except Exception as e:
+        return e
+
+
 if __name__ == "__main__":
     file_name = "currency.csv"
     csv_file_name = f'data/{file_name}'
@@ -70,10 +93,6 @@ if __name__ == "__main__":
     conn.autocommit = True
     cursor = conn.cursor()
     # print(create_table("CURRENCY_RATE"))
-
     # print(from_s3_to_postgres(bucket_name, file_name, cursor, conn))
-    # cursor.execute('''select * from CURRENCY_RATE;''')
-    # for i in cursor.fetchall():
-    #     print(i)
-
+    dataframe = get_data_from_db(cursor, conn)
     conn.close()
