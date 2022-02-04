@@ -4,12 +4,12 @@ from smart_open import smart_open
 import pandas as pd
 
 
-def create_database(name):
+def create_database(name, cursor):
     cursor.execute(f'''CREATE database {name}''')
     return "Database created successfully......"
 
 
-def create_table(name):
+def create_table(name, cursor):
     try:
         cursor.execute(f'''CREATE TABLE {name}(date varchar NOT NULL CONSTRAINT date UNIQUE, rate varchar)''')
         return f"Table - {name} crated successfully"
@@ -74,25 +74,25 @@ def get_data_from_db(cursor, connection):
         rate_list = []
         for i, j in zip(date, rate):
             date_list.append(i[0])
-            rate_list.append(j[0])
+            rate_list.append(float(j[0]))
         data_dict = dict(zip(date_list, rate_list))
         data_items = list(data_dict.items())
-        df = pd.DataFrame(data_items, columns=["data", "rate"])
+        df = pd.DataFrame(data_items, columns=["date", "rate"])
         connection.commit()
         return df
     except Exception as e:
         return e
 
 
-if __name__ == "__main__":
-    file_name = "currency.csv"
-    csv_file_name = f'data/{file_name}'
-    bucket_name = 's3-all-data'
-
-    conn = connect_to_db()
-    conn.autocommit = True
-    cursor = conn.cursor()
-    # print(create_table("CURRENCY_RATE"))
-    # print(from_s3_to_postgres(bucket_name, file_name, cursor, conn))
-    dataframe = get_data_from_db(cursor, conn)
-    conn.close()
+# if __name__ == "__main__":
+#     file_name = "currency.csv"
+#     csv_file_name = f'data/{file_name}'
+#     bucket_name = 's3-all-data'
+#
+#     conn = connect_to_db()
+#     conn.autocommit = True
+#     cursor = conn.cursor()
+#     # print(create_table("CURRENCY_RATE"))
+#     # print(from_s3_to_postgres(bucket_name, file_name, cursor, conn))
+#     dataframe = get_data_from_db(cursor, conn)
+#     conn.close()
