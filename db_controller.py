@@ -64,6 +64,8 @@ def from_s3_to_postgres(bucketName, fileName, cursor, connection):
                 try:
                     postgres_insert_query = """ INSERT INTO CURRENCY_RATE (date, rate) VALUES (%s, %s)"""
                     cursor.execute(postgres_insert_query, (rate, date,))
+                    delete_query = """DELETE FROM CURRENCY_RATE WHERE date = 'date'"""
+                    cursor.execute(delete_query)
                 except psycopg2.Error as e:
                     print(e)
                     pass
