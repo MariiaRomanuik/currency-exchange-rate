@@ -49,67 +49,73 @@ def most_frequent_rates(df):
 
 
 def exchange_rate_analysis(df):
-    average_for_year = df["rate"].mean()
-    print("Average exchange rate for the year:", average_for_year)
+    try:
+        average_for_year = df["rate"].mean()
+        print("Average exchange rate for the year:", average_for_year)
 
-    median_for_year = df["rate"].median()
-    print("Median exchange rate:", median_for_year)
+        median_for_year = df["rate"].median()
+        print("Median exchange rate:", median_for_year)
 
-    max_for_year = df["rate"].max()
-    print("The maximum value of the course for the year:", max_for_year)
+        max_for_year = df["rate"].max()
+        print("The maximum value of the course for the year:", max_for_year)
 
-    min_for_year = df["rate"].min()
-    print("The minimum value of the course for the year:", min_for_year)
+        min_for_year = df["rate"].min()
+        print("The minimum value of the course for the year:", min_for_year)
 
-    month_list = []
-    for i in range(0, len(df)):
-        month = df["date"][i][3:5]
-        month_list.append(month)
-    df["month_number"] = month_list
-    grouped_data = df.groupby(["month_number"]).mean()
-    favorable_year_rate = grouped_data.nsmallest(1, "rate")
-    print("Favorable year rate:", favorable_year_rate["rate"][0])
-    print("Most frequent rates: ")
-    most_frequent_rates(df)
+        month_list = []
+        for i in range(0, len(df)):
+            month = df["date"][i][3:5]
+            month_list.append(month)
+        df["month_number"] = month_list
+        grouped_data = df.groupby(["month_number"]).mean()
+        favorable_year_rate = grouped_data.nsmallest(1, "rate")
+        print("Favorable year rate:", favorable_year_rate["rate"][0])
+        print("Most frequent rates: ")
+        most_frequent_rates(df)
+    except ValueError as e:
+        return e
 
 
-def dataframe_to_csv(csv_name, dictionary):
-    df = pd.DataFrame(dictionary)
+def write_dataframe_to_csv(csv_name, dataframe):
     if not os.path.exists(os.path.dirname(csv_name)):
         try:
             os.makedirs(os.path.dirname(csv_name))
         except OSError as exc:
             if exc.errno != errno.EEXIST:
                 raise
-    csv_file = df.to_csv(csv_name, encoding='utf-8')
+    csv_file = dataframe.to_csv(csv_name, encoding='utf-8')
     print("Data successfully written to csv")
     return csv_file
 
 
 if __name__ == "__main__":
     file_name = "currency.csv"
-    csv_file_name = f'data/{file_name}'
+    folder_name = "data"
+    path_to_csv_file = f'{folder_name}/{file_name}'
     bucket_name = 's3-all-data'
     s3_path_to_file = f's3://{bucket_name}/{file_name}'
     region = 'us-east-2'
 
-    start_date = moment.date('2021-01-01')
-    end_date = moment.date('2022-01-01')
-    dates = list(dates_between_two_dates(start_date, end_date))
-    list_of_url = list(map(get_url, dates))
-    response = list(map(lambda url: requests.get(url).json(), list_of_url))
-    data_dict = {"date": get_list_of_data(response)[0], "rate": get_list_of_data(response)[1]}
-    path_to_csv_file = "./data/currency.csv"
-    dataframe_to_csv(path_to_csv_file, data_dict)
-    print(create_bucket(bucket_name, region))
-    print(upload_file_to_s3(csv_file_name, bucket_name))
+    if not os.path.isfile(path_to_csv_file):
+
+        start_date = moment.date('2021-01-01')
+        end_date = moment.date('2022-01-01')
+        dates = list(dates_between_two_dates(start_date, end_date))
+        list_of_url = list(map(get_url, dates))
+        response = list(map(lambda url: requests.get(url).json(), list_of_url))
+        data_dict = {"date": get_list_of_data(response)[0], "rate": get_list_of_data(response)[1]}
+        df = pd.DataFrame(data_dict)
+        path_to_csv_file = "./data/currency.csv"
+        write_dataframe_to_csv(path_to_csv_file, df)
+        print(create_bucket(bucket_name, region))
+        print(upload_file_to_s3(path_to_csv_file, bucket_name))
 
     conn = connect_to_db()
     conn.autocommit = True
     cursor = conn.cursor()
     # print(create_database("postgres", cursor))
     # print(create_table("CURRENCY_RATE", cursor))
-    # print(from_s3_to_postgres(bucket_name, file_name, cursor, conn))
+    print(from_s3_to_postgres(bucket_name, file_name, cursor, conn))
     dataframe = get_data_from_db(cursor, conn)
 
     exchange_rate_analysis(dataframe)
