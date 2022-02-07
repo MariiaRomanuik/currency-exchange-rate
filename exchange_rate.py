@@ -6,7 +6,8 @@ import requests
 import moment
 import pandas as pd
 
-from db_controller import connect_to_db, get_data_from_db
+from aws_controller import create_bucket, upload_file_to_s3
+from db_controller import connect_to_db, get_data_from_db, create_database, create_table, from_s3_to_postgres
 
 
 def dates_between_two_dates(startDate, endDate):
@@ -67,7 +68,6 @@ def exchange_rate_analysis(df):
     df["month_number"] = month_list
     grouped_data = df.groupby(["month_number"]).mean()
     favorable_year_rate = grouped_data.nsmallest(1, "rate")
-    # print("Favorable year rate", favorable_year_rate["rate"])
     print("Favorable year rate:", favorable_year_rate["rate"][0])
     print("Most frequent rates: ")
     most_frequent_rates(df)
@@ -87,26 +87,31 @@ def dataframe_to_csv(csv_name, dictionary):
 
 
 if __name__ == "__main__":
-    # start_date = moment.date('2021-01-01')
-    # end_date = moment.date('2022-01-01')
-    # dates = list(dates_between_two_dates(start_date, end_date))
-    # list_of_url = list(map(get_url, dates))
-    # response = list(map(lambda url: requests.get(url).json(), list_of_url))
-    # data_dict = {"date": get_list_of_data(response)[0], "rate": get_list_of_data(response)[1]}
-    # path_to_csv_file = "./data/currency.csv"
-    # dataframe_to_csv(path_to_csv_file, data_dict)
-
     file_name = "currency.csv"
     csv_file_name = f'data/{file_name}'
     bucket_name = 's3-all-data'
+    s3_path_to_file = f's3://{bucket_name}/{file_name}'
+    region = 'us-east-2'
+
+    start_date = moment.date('2021-01-01')
+    end_date = moment.date('2022-01-01')
+    dates = list(dates_between_two_dates(start_date, end_date))
+    list_of_url = list(map(get_url, dates))
+    response = list(map(lambda url: requests.get(url).json(), list_of_url))
+    data_dict = {"date": get_list_of_data(response)[0], "rate": get_list_of_data(response)[1]}
+    path_to_csv_file = "./data/currency.csv"
+    dataframe_to_csv(path_to_csv_file, data_dict)
+    print(create_bucket(bucket_name, region))
+    print(upload_file_to_s3(csv_file_name, bucket_name))
 
     conn = connect_to_db()
     conn.autocommit = True
     cursor = conn.cursor()
-    # print(create_table("CURRENCY_RATE"), cursor)
+    # print(create_database("postgres", cursor))
+    # print(create_table("CURRENCY_RATE", cursor))
     # print(from_s3_to_postgres(bucket_name, file_name, cursor, conn))
     dataframe = get_data_from_db(cursor, conn)
-    conn.close()
 
     exchange_rate_analysis(dataframe)
+    conn.close()
 
