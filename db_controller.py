@@ -53,21 +53,24 @@ def connect_to_db():
 
 
 def from_s3_to_postgres(bucketName, fileName, cursor, connection):
-    with smart_open(f's3://{bucketName}/{fileName}', 'rb') as s3_source:
-        for line in s3_source:
-            # print(line.decode('utf8'))
+    try:
+        with smart_open(f's3://{bucketName}/{fileName}', 'rb') as s3_source:
+            for line in s3_source:
+                # print(line.decode('utf8'))
 
-            # TODO: write without first line
-            rate = line.decode('utf8').split(",")[1]
-            date = line.decode('utf8').split(",")[2].split("\r\n")[0]
-            try:
-                postgres_insert_query = """ INSERT INTO CURRENCY_RATE (date, rate) VALUES (%s, %s)"""
-                cursor.execute(postgres_insert_query, (rate, date,))
-            except psycopg2.Error as e:
-                print(e)
-                pass
-        connection.commit()
-        return "Data successfully written to database!"
+                # TODO: write without first line
+                rate = line.decode('utf8').split(",")[1]
+                date = line.decode('utf8').split(",")[2].split("\r\n")[0]
+                try:
+                    postgres_insert_query = """ INSERT INTO CURRENCY_RATE (date, rate) VALUES (%s, %s)"""
+                    cursor.execute(postgres_insert_query, (rate, date,))
+                except psycopg2.Error as e:
+                    print(e)
+                    pass
+            connection.commit()
+            return "Data successfully written to database!"
+    except Exception as e:
+        return e
 
 
 def get_data_from_db(cursor, connection):
