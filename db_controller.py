@@ -91,16 +91,3 @@ def get_data_from_db(cursor, connection):
     except Exception as e:
         return e
 
-
-# if __name__ == "__main__":
-#     file_name = "currency.csv"
-#     csv_file_name = f'data/{file_name}'
-#     bucket_name = 's3-all-data'
-#
-#     conn = connect_to_db()
-#     conn.autocommit = True
-#     cursor = conn.cursor()
-#     # print(create_table("CURRENCY_RATE"))
-#     # print(from_s3_to_postgres(bucket_name, file_name, cursor, conn))
-#     dataframe = get_data_from_db(cursor, conn)
-#     conn.close()
