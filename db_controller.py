@@ -5,8 +5,11 @@ import pandas as pd
 
 
 def create_database(name, cursor):
-    cursor.execute(f'''CREATE database {name}''')
-    return "Database created successfully......"
+    try:
+        cursor.execute(f'''CREATE database {name}''')
+        return "Database created successfully......"
+    except Exception as e:
+        return e
 
 
 def create_table(name, cursor):
@@ -33,15 +36,20 @@ def get_db_credentials(path):
 
 
 def connect_to_db():
-    credentials = get_db_credentials("./db_credentials.txt")
-    connection = psycopg2.connect(
-        host=credentials["host"],
-        port=credentials["port"],
-        user=credentials["user"],
-        password=credentials["password"],
-        database=credentials["database"]
-    )
-    return connection
+    try:
+        credentials = get_db_credentials("./db_credentials.txt")
+        connection = psycopg2.connect(
+            host=credentials["host"],
+            port=credentials["port"],
+            user=credentials["user"],
+            password=credentials["password"],
+            database=credentials["database"]
+        )
+        print('Database connected')
+        return connection
+    except Exception as e:
+        print('Database not connected')
+        raise e
 
 
 def from_s3_to_postgres(bucketName, fileName, cursor, connection):
