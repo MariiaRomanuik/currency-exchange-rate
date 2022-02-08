@@ -8,8 +8,8 @@ def create_database(name, cursor):
     try:
         cursor.execute(f'''CREATE database {name}''')
         return "Database created successfully......"
-    except Exception as e:
-        return e
+    except psycopg2.errors.DuplicateDatabase as e:
+        raise e
 
 
 def create_table(name, cursor):
