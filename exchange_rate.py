@@ -1,7 +1,6 @@
 import csv
 import errno
 import os
-
 import requests
 import moment
 import pandas as pd
@@ -113,8 +112,8 @@ if __name__ == "__main__":
     conn = connect_to_db()
     conn.autocommit = True
     cursor = conn.cursor()
-    # print(create_database("postgres", cursor))
-    # print(create_table("CURRENCY_RATE", cursor))
+    create_database("postgres", cursor)
+    create_table("CURRENCY_RATE", cursor)
     print(from_s3_to_postgres(bucket_name, file_name, cursor, conn))
     dataframe = get_data_from_db(cursor, conn)
 
