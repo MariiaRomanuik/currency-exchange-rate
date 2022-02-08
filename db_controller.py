@@ -7,9 +7,10 @@ import pandas as pd
 def create_database(name, cursor):
     try:
         cursor.execute(f'''CREATE database {name}''')
-        return "Database created successfully......"
+        print("Database created successfully......")
     except psycopg2.errors.DuplicateDatabase as e:
-        raise e
+        print(e)
+        pass
 
 
 def create_table(name, cursor):
