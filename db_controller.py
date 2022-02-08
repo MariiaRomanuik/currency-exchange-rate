@@ -94,7 +94,7 @@ def get_data_from_db(cursor, connection):
         data_items = list(data_dict.items())
         df = pd.DataFrame(data_items, columns=["date", "rate"])
         connection.commit()
-        return df
+        return df, date_list, rate_list
     except Exception as e:
         return e
 
