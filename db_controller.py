@@ -16,8 +16,9 @@ def create_table(name, cursor):
     try:
         cursor.execute(f'''CREATE TABLE {name}(date varchar NOT NULL CONSTRAINT date UNIQUE, rate varchar)''')
         return f"Table - {name} crated successfully"
-    except Exception as e:
-        return e
+    except psycopg2.errors.DuplicateTable as e:
+        print(e)
+        pass
 
 
 def get_db_credentials(path):
