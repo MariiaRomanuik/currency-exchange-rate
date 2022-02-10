@@ -54,15 +54,15 @@ def read_csv_from_s3_as_df(path):
     return df
 
 
-if __name__ == "__main__":
-    file_name = "currency.csv"
-    csv_file_name = f'data/{file_name}'
-    bucket_name = 's3-all-data'
-    s3_path_to_file = f's3://{bucket_name}/{file_name}'
-    bucket_name = 's3-all-data'
-    region = 'us-east-2'
-    # print(create_bucket(bucket_name, region))
-    # print(upload_file_to_s3(file_name, bucket_name))
-    if is_in_s3(file_name, bucket_name):
-        print(read_csv_from_s3_as_df(s3_path_to_file))
+# if __name__ == "__main__":
+#     file_name = "currency.csv"
+#     csv_file_name = f'data/{file_name}'
+#     bucket_name = 's3-all-data'
+#     s3_path_to_file = f's3://{bucket_name}/{file_name}'
+#     bucket_name = 's3-all-data'
+#     region = 'us-east-2'
+#     # print(create_bucket(bucket_name, region))
+#     # print(upload_file_to_s3(file_name, bucket_name))
+#     if is_in_s3(file_name, bucket_name):
+#         print(read_csv_from_s3_as_df(s3_path_to_file))
 
