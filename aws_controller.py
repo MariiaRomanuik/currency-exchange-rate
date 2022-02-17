@@ -23,7 +23,7 @@ def create_bucket(bucketName, awsRegion):
 def upload_file_to_s3(fileName, bucket, objectName=None):
     # If S3 object_name was not specified, use fileName
     if objectName is None:
-        object_name = os.path.basename(fileName)
+        objectName = os.path.basename(fileName)
 
     # Upload the file
     s3_client = boto3.client('s3')
