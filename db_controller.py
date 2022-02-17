@@ -58,16 +58,15 @@ def from_s3_to_postgres(bucketName, fileName, cursor, connection):
     try:
         with smart_open(f's3://{bucketName}/{fileName}', 'rb') as s3_source:
             for line in s3_source:
-                # print(line.decode('utf8'))
-
-                # TODO: write without first line
                 rate = line.decode('utf8').split(",")[1]
                 date = line.decode('utf8').split(",")[2].split("\r\n")[0]
+                if date == "date":
+                    continue
                 try:
                     postgres_insert_query = """ INSERT INTO CURRENCY_RATE (date, rate) VALUES (%s, %s)"""
                     cursor.execute(postgres_insert_query, (rate, date,))
-                    delete_query = """DELETE FROM CURRENCY_RATE WHERE date = 'date'"""
-                    cursor.execute(delete_query)
+                    # delete_query = """DELETE FROM CURRENCY_RATE WHERE date = 'date'"""
+                    # cursor.execute(delete_query)
                 except psycopg2.Error as e:
                     print(e)
                     pass
