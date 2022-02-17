@@ -60,7 +60,7 @@ def from_s3_to_postgres(bucketName, fileName, cursor, connection):
             for line in s3_source:
                 rate = line.decode('utf8').split(",")[1]
                 date = line.decode('utf8').split(",")[2].split("\r\n")[0]
-                if date == "date":
+                if date == "rate":
                     continue
                 try:
                     postgres_insert_query = """ INSERT INTO CURRENCY_RATE (date, rate) VALUES (%s, %s)"""
