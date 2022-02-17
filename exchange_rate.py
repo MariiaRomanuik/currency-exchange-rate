@@ -5,7 +5,7 @@ import requests
 import moment
 import pandas as pd
 
-from aws_controller import create_bucket, upload_file_to_s3
+from aws_controller import create_bucket, upload_file_to_s3, is_in_s3
 from db_controller import connect_to_db, get_data_from_db, create_database, create_table, from_s3_to_postgres
 
 
@@ -88,26 +88,26 @@ def write_dataframe_to_csv(csv_name, dataframe):
 
 
 if __name__ == "__main__":
-    file_name = "currency.csv"
+    start_date = '2020-02-01'
+    end_date = '2021-03-01'
+    file_name = f"{start_date}-{end_date}.csv"
     folder_name = "data"
-    path_to_csv_file = f'{folder_name}/{file_name}'
+    path_to_csv_file = f'./{folder_name}/{file_name}'
     bucket_name = 's3-all-data'
     s3_path_to_file = f's3://{bucket_name}/{file_name}'
     region = 'us-east-2'
-
-    if not os.path.isfile(path_to_csv_file):
-
-        start_date = moment.date('2021-01-01')
-        end_date = moment.date('2022-01-01')
-        dates = list(dates_between_two_dates(start_date, end_date))
+    # if not os.path.isfile(path_to_csv_file):  # check not local if it is exist, but in s3
+    if not is_in_s3(file_name, bucket_name):
+        start_moment_date = moment.date(start_date)
+        end_moment_date = moment.date(end_date)
+        dates = list(dates_between_two_dates(start_moment_date, end_moment_date))
         list_of_url = list(map(get_url, dates))
         response = list(map(lambda url: requests.get(url).json(), list_of_url))
         data_dict = {"date": get_list_of_data(response)[0], "rate": get_list_of_data(response)[1]}
         df = pd.DataFrame(data_dict)
-        path_to_csv_file = "./data/currency.csv"
         write_dataframe_to_csv(path_to_csv_file, df)
-        print(create_bucket(bucket_name, region))
-        print(upload_file_to_s3(path_to_csv_file, bucket_name))
+        create_bucket(bucket_name, region)
+        upload_file_to_s3(path_to_csv_file, bucket_name)
 
     conn = connect_to_db()
     conn.autocommit = True
@@ -115,8 +115,13 @@ if __name__ == "__main__":
     create_database("postgres", cursor)
     create_table("CURRENCY_RATE", cursor)
     print(from_s3_to_postgres(bucket_name, file_name, cursor, conn))
-    dataframe = get_data_from_db(cursor, conn)
+    # dataframe = get_data_from_db(cursor, conn)
+    # print(dataframe)
+    labels = get_data_from_db(cursor, conn)[1]
+    values = get_data_from_db(cursor, conn)[2]
+    print("labels", labels)
+    print("values", values)
 
-    exchange_rate_analysis(dataframe)
+    # exchange_rate_analysis(dataframe)
     conn.close()
 
