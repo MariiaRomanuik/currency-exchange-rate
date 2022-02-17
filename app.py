@@ -27,6 +27,8 @@ def api_timeline():
 def get_graph():
     start_date = request.args.get('start_date')  # key
     end_date = request.args.get('end_date')
+    rate_from = request.args.get('rate_from')  # value
+    rate_to = request.args.get('rate_to')
     file_name = f"{start_date}-{end_date}.csv"
     folder_name = "data"
     path_to_csv_file = f'./{folder_name}/{file_name}'
@@ -51,8 +53,8 @@ def get_graph():
     create_table("CURRENCY_RATE", cursor)
     print(from_s3_to_postgres(bucket_name, file_name, cursor, connection))
     # dataframe = get_data_from_db(cursor, connection)[0]
-    labels = get_data_from_db(cursor, connection)[1]
-    values = get_data_from_db(cursor, connection)[2]
+    labels = get_data_from_db(cursor, connection, start_date, end_date, rate_from, rate_to)[1]
+    values = get_data_from_db(cursor, connection, start_date, end_date, rate_from, rate_to)[2]
 
     connection.close()
     return render_template("graph.html", labels=labels, values=values)
