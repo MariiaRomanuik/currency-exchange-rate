@@ -1,3 +1,4 @@
+import datetime
 import os
 import psycopg2
 from smart_open import smart_open
@@ -77,13 +78,17 @@ def from_s3_to_postgres(bucketName, fileName, cursor, connection):
 
 
 def get_data_from_db(cursor, connection, start_date, end_date, rate_from, rate_to):
+    start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d').strftime('%d.%m.%Y')
+    end_date = datetime.datetime.strptime(end_date, '%Y-%m-%d').strftime('%d.%m.%Y')
     try:
-        select_date_query = """ SELECT "date" FROM CURRENCY_RATE WHERE "date" BETWEEN %s AND %s"""
+        select_date_query = """ SELECT date FROM CURRENCY_RATE WHERE date BETWEEN %s AND %s"""
         cursor.execute(select_date_query, (start_date,  end_date))
         date = cursor.fetchall()
         # select_rate_query = """ SELECT "rate" FROM CURRENCY_RATE WHERE "rate" BETWEEN rate_from and rate_to"""
-        select_rate_query = """ SELECT "rate" FROM CURRENCY_RATE WHERE "rate" BETWEEN %s AND %s"""
-        cursor.execute(select_rate_query, (rate_from, rate_to))
+        select_rate_query = """SELECT rate FROM (SELECT date, rate FROM currency_rate cr2 
+                               WHERE date BETWEEN %s AND %s) a
+                               WHERE rate BETWEEN %s AND %s"""
+        cursor.execute(select_rate_query, (start_date, end_date, rate_from, rate_to))
         rate = cursor.fetchall()
         date_list = []
         rate_list = []
