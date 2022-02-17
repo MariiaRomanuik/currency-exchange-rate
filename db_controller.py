@@ -76,13 +76,14 @@ def from_s3_to_postgres(bucketName, fileName, cursor, connection):
         return e
 
 
-def get_data_from_db(cursor, connection):
+def get_data_from_db(cursor, connection, start_date, end_date, rate_from, rate_to):
     try:
-        select_date_query = """ SELECT "date" FROM CURRENCY_RATE"""
-        cursor.execute(select_date_query)
+        select_date_query = """ SELECT "date" FROM CURRENCY_RATE WHERE "date" BETWEEN %s AND %s"""
+        cursor.execute(select_date_query, (start_date,  end_date))
         date = cursor.fetchall()
-        select_rate_query = """ SELECT "rate" FROM CURRENCY_RATE"""
-        cursor.execute(select_rate_query)
+        # select_rate_query = """ SELECT "rate" FROM CURRENCY_RATE WHERE "rate" BETWEEN rate_from and rate_to"""
+        select_rate_query = """ SELECT "rate" FROM CURRENCY_RATE WHERE "rate" BETWEEN %s AND %s"""
+        cursor.execute(select_rate_query, (rate_from, rate_to))
         rate = cursor.fetchall()
         date_list = []
         rate_list = []
