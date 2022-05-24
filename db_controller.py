@@ -81,11 +81,8 @@ def get_data_from_db(cursor, connection, start_date, end_date, rate_from, rate_t
     start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d').strftime('%d.%m.%Y')
     end_date = datetime.datetime.strptime(end_date, '%Y-%m-%d').strftime('%d.%m.%Y')
     try:
-        # select_date_query = """ SELECT date FROM CURRENCY_RATE WHERE date BETWEEN %s AND %s"""
-        select_date_query = """SELECT date FROM (SELECT date, rate FROM currency_rate cr2 
-                              WHERE date BETWEEN %s AND %s) a
-                              WHERE rate BETWEEN %s AND %s"""
-        cursor.execute(select_date_query, (start_date,  end_date, rate_from, rate_to))
+        select_date_query = """ SELECT date FROM CURRENCY_RATE WHERE date BETWEEN %s AND %s"""
+        cursor.execute(select_date_query, (start_date,  end_date))
         date = cursor.fetchall()
         # select_rate_query = """ SELECT "rate" FROM CURRENCY_RATE WHERE "rate" BETWEEN rate_from and rate_to"""
         select_rate_query = """SELECT rate FROM (SELECT date, rate FROM currency_rate cr2 
@@ -106,9 +103,3 @@ def get_data_from_db(cursor, connection, start_date, end_date, rate_from, rate_t
     except Exception as e:
         return e
 
-# TODO: data in database written not in order l want to take
-#  for example: we write dates from 2020-01-01 to 2020-01-10
-#  then write again from 2020-01-01 to 2021-01-01
-#  and when we want to take from 2020-01-01 to 2020-01-20
-#  it might grab all data
-#  from 2020-01-01 to 2020-01-10 and then from 2020-01-01 to 2020-01-20
